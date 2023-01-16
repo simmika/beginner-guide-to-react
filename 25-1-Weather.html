@@ -9,85 +9,79 @@
       return Math.floor(Math.random() * max);
     }
 
-    function Weather(){
+    function Weather() {
       const [city, setCity] = React.useState('Vilnius')
-      const [weather, setWeather] = React.useState(null)
-      const [cold, setCold] = React.useState(false)
       const [loading, setLoading] = React.useState(false)
-      const [cityExist, setCityExist] = React.useState(true)
-      const [time, setTime] = React.useState("")
       const [items, setItems] = React.useState([])
 
-    function addItem() {
-      setItems([...items,{
-        city: city,
-        weather: weather,
-        time: time,
-        cold: cold,
-        loading: loading,
-        cityExist: cityExist
-      }])
-    }
-
-    React.useEffect(() => {
-      addItem()
-    }, [time])
-
-    function handleCityChange(event) {
-      setCity(event.target.value)
-    }
+      function handleCityChange(event) {
+        setCity(event.target.value)
+      }
   
-    async function handleSubmitClick() {
-      const date = new Date().toLocaleTimeString()
-      setLoading(true)
-      const cityData = await fetchCityData(city)
+      async function handleSubmit(e) {
+        e.preventDefault()
+        setLoading(true)
+        const cityData = await fetchCityData(city)
+        const key = getRandomInt(100000);
+        const time = new Date().toLocaleTimeString()
 
-      if (!cityData) {
-        setCityExist(false)
-        setLoading(false)
-        setTime(date)
-        return
+        if (!cityData) {
+          const item = {
+            key,
+            city: city,
+            cityExist: false,
+            time: time,
+          };
+          setItems((currentItems) => ([...currentItems, item]))
+          setLoading(false)
+          return
+        }
+
+        const temperature = await fetchTemperature(cityData)
+        const item = {
+          key,
+          city: city,
+          weather: temperature,
+          cityExist: true,
+          time: time,
+          cold: temperature < 0,
+        };
+        setItems((currentItems) => ([...currentItems, item]))
       }
-
-      const temperature = await fetchTemperature(cityData)
-      setCityExist(true)
-      setLoading(false) 
-      setCold(temperature < 0)
-      setWeather(temperature)
-      setTime(date)
-    }
-    
-    function WeatherDisplay({item}) {
-      if (item.loading) {
-        return <div>Loading...</div>
-      }
-
-      if (!item.cityExist) {
-        return <div>There is no such city "{item.city}"</div>
-      }
-
-      return (
-        <div>City: {item.city} {item.weather}
-          <span role="img" aria-label="emoji">{item.cold && item.weather ? "🐑" : "☀️"}</span>
-          {item.time}
-          </div>
-      )
-    }
-    
+      
       return (
         <div>
+          <form onSubmit={handleSubmit}>
           <label htmlFor="city">City:</label>
           <input id="city" onChange={handleCityChange} defaultValue={city} type="text"/>
-          <button disabled={!city} onClick={handleSubmitClick} type="submit">Submit</button>
+          <button disabled={!city} type="submit">Submit</button>
           <ul>
             {items.map(item => (
-              <li key={item.city + getRandomInt(100000)}>
+              <li key={item.key}>
                 <WeatherDisplay item={item}/>  
               </li>
               ))}
           </ul>
+          </form>
         </div>
       )
+  }
+
+  function WeatherDisplay({item}) {
+    if (item.loading) {
+      return <div>Loading...</div>
+    }
+
+    if (!item.cityExist) {
+      return <div>There is no such city "{item.city}"</div>
+    }
+
+    return (
+      <div>City: {item.city} {item.weather}
+        <span role="img" aria-label="emoji">{item.cold && item.weather ? "🐑" : "☀️"}</span>
+        {item.time}
+        </div>
+    )
   }
   
   
@@ -95,12 +89,10 @@
     let response = await window.fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${city}`)
     let responseJson = await response.json()
     let results = responseJson.results
-    let rez = undefined
     if (results) {
-      rez = results.find(i => i.name.toLowerCase() === city.toLowerCase())
-    } 
-
-    return rez
+      return results.find(i => i.name.toLowerCase() === city.toLowerCase())
+    }
+    return undefined
   }
 
   async function fetchTemperature(cityData) {
