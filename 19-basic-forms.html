@@ -1,0 +1,39 @@
+<body>
+  <div id="root"></div>
+  <script src="https://unpkg.com/react@16.12.0/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@16.12.0/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.8.3/babel.js"></script>
+  <script type="text/babel">
+    function UsernameForm() {
+      const [username, setUsername] = React.useState('')
+
+      const handleSubmit = () => {
+        event.preventDefault()
+
+        alert('labas ' + username)
+      }
+
+      // const handleChange = (event) => setUsername(onlyLetters(event.target.value))
+
+      const handleChange = (event) => setUsername(event.target.value)
+
+      const hasNumbers = (text) => Boolean(text.match(/[0-9]/g)) ? 'Error' : false
+
+      const onlyLetters = (string) => string.replace(/[0-9]/g, '')
+
+      return (
+        <form onSubmit={handleSubmit}>
+          <div>
+            <div style={{color: 'red'}}>{hasNumbers(username)}</div>
+            <p></p>
+            <label htmlFor="username">Username:</label>
+            <input onChange={handleChange} id="username" type="text" value={username}/>
+          </div>
+          <button disabled={!username || hasNumbers(username)} type="submit">Submit</button>
+        </form>
+      )
+    }
+
+    ReactDOM.render(<UsernameForm />, document.getElementById('root'))
+  </script>
+</body>

@@ -1,0 +1,71 @@
+<body>
+  <div id="root"></div>
+  <script src="https://unpkg.com/react@16.12.0/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@16.12.0/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.8.3/babel.js"></script>
+  <script type="text/babel">
+    const rootElement = document.getElementById('root')
+    const childrennnn = "AAAA"
+    const className = "BBBBBB"
+    const id = "id1"
+    const props = {children: childrennnn, className: className, id: id}
+
+    const element1 = <div id="message" {...props} >Labas vakaras</div>
+    const element2 = <div {...props} id="message" >Labas vakaras 4</div>
+
+    const allElements = (<React.Fragment>
+    <div id="message" {...props}>Labas vakaras</div>
+    <div {...props} id="message">Labas vakaras 333</div>
+    </React.Fragment>)
+
+   
+    const Message = props => {
+      const text = props.children
+
+      const upperCase = text.replaceAll(/[a-z]/g, '')
+
+      // const upperCase = Array.prototype.filter.call(text, letter => letter == letter.toUpperCase())
+
+  
+      // let count = 0
+      // for (let i = 0; i < text.length; i++) {
+      //   let letter = text[i]
+      //   if( letter == letter.toUpperCase()) {
+      //     count++
+      //   }
+      // }
+      return (<div>
+        {`This text ${props.children} contains `}
+        <span style={{color: 'red'}}>{upperCase.length != 0 ? <strong>{upperCase.length}</strong> : 'No'}</span>
+        {` Upper Case letters`}</div>)
+  }
+
+    const el = (<>
+      <Message className="Simona" children="AAasAAA"/>
+      <Message className="Jaroslavas" children="kajsakjsd"/>
+      <Message className="Egis">EgiS</Message>
+    </>
+    )
+
+
+
+
+
+    ReactDOM.render(el, rootElement)
+
+
+    // const element = React.createElement('div', {
+    //   className: "cont"
+    // }, "Hi")
+
+    // ReactDOM.render(element, rootElement)
+
+
+    // const element = document.createElement('div')
+    // element.textContent = 'Hello World'
+    // element.className = 'container'
+    // rootElement.appendChild(element)
+  </script>
+</body>
+
+

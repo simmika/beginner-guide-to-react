@@ -1,0 +1,121 @@
+<body>
+  <div id="root"></div>
+  <script src="https://unpkg.com/react@16.12.0/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@16.12.0/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.8.3/babel.js"></script>
+  <script type="text/babel">
+
+    function getRandomInt(max) {
+      return Math.floor(Math.random() * max);
+    }
+
+    function Weather(){
+      const [city, setCity] = React.useState('Vilnius')
+      const [weather, setWeather] = React.useState(null)
+      const [cold, setCold] = React.useState(false)
+      const [loading, setLoading] = React.useState(false)
+      const [cityExist, setCityExist] = React.useState(true)
+      const [time, setTime] = React.useState("")
+      const [items, setItems] = React.useState([])
+
+    function addItem() {
+      setItems([...items,{
+        city: city,
+        weather: weather,
+        time: time,
+        cold: cold,
+        loading: loading,
+        cityExist: cityExist
+      }])
+    }
+
+    React.useEffect(() => {
+      addItem()
+    }, [time])
+
+    function handleCityChange(event) {
+      setCity(event.target.value)
+    }
+  
+    async function handleSubmitClick() {
+      const date = new Date().toLocaleTimeString()
+      setLoading(true)
+      const cityData = await fetchCityData(city)
+
+      if (!cityData) {
+        setCityExist(false)
+        setLoading(false)
+        setTime(date)
+        return
+      }
+
+      const temperature = await fetchTemperature(cityData)
+      setCityExist(true)
+      setLoading(false) 
+      setCold(temperature < 0)
+      setWeather(temperature)
+      setTime(date)
+    }
+    
+    function WeatherDisplay({item}) {
+      if (item.loading) {
+        return <div>Loading...</div>
+      }
+
+      if (!item.cityExist) {
+        return <div>There is no such city "{item.city}"</div>
+      }
+
+      return (
+        <div>City: {item.city} {item.weather}
+          <span role="img" aria-label="emoji">{item.cold && item.weather ? "🐑" : "☀️"}</span>
+          {item.time}
+          </div>
+      )
+    }
+    
+      return (
+        <div>
+          <label htmlFor="city">City:</label>
+          <input id="city" onChange={handleCityChange} defaultValue={city} type="text"/>
+          <button disabled={!city} onClick={handleSubmitClick} type="submit">Submit</button>
+          <ul>
+            {items.map(item => (
+              <li key={item.city + getRandomInt(100000)}>
+                <WeatherDisplay item={item}/>  
+              </li>
+              ))}
+          </ul>
+        </div>
+      )
+  }
+  
+  
+  async function fetchCityData(city) {
+    let response = await window.fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${city}`)
+    let responseJson = await response.json()
+    let results = responseJson.results
+    let rez = undefined
+    if (results) {
+      rez = results.find(i => i.name.toLowerCase() === city.toLowerCase())
+    } 
+
+    return rez
+  }
+
+  async function fetchTemperature(cityData) {
+    if (!cityData) {
+      return undefined
+    }
+    let response = await window.fetch
+    (`https://api.open-meteo.com/v1/forecast?latitude=${cityData.latitude}&longitude=${cityData.longitude}&current_weather=true`)
+    let responseJson = await response.json()
+    return responseJson.current_weather.temperature
+  }
+
+  ReactDOM.render(<Weather />, document.getElementById('root'))
+  </script>
+</body>
+
+
+<!-- Saittarova  Yakutsk-->
